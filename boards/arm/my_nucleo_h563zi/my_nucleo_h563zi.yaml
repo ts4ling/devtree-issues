@@ -1,0 +1,21 @@
+identifier: my_nucleo_h563zi
+name: MY NUCLEO H563ZI
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+ram: 640
+flash: 2048
+supported:
+  - gpio
+  - uart
+  - entropy
+  - adc
+  - dac
+  - pwm
+  - counter
+  - spi
+  - usb_device
+  - usb
+  - rtc
+vendor: st

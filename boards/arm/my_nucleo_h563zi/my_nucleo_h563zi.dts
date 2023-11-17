@@ -1,0 +1,260 @@
+/*
+ * Copyright (c) 2021 Linaro Limited
+ * Copyright (c) 2023 Thomas Stranger
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+#include "my_nucleo_h563zi-common.dtsi"
+
+
+/ {
+	model = "My Nucleo STM32H563ZI board";
+	compatible = "st,stm32h563zi-nucleo";
+
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	chosen {
+		zephyr,console = &usart2;
+		zephyr,shell-uart = &usart2;
+		zephyr,sram = &sram1;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+	};
+
+	aliases {
+//		led0 = &green_led_1;
+//		sw0 = &user_button;
+		watchdog0 = &iwdg;
+//		pwm-led0 = &pwm_led_1;
+//		volt-sensor0 = &vref;
+//		volt-sensor1 = &vbat;
+	};
+
+        x3x: x3x {
+                compatible = "gpio-leds";
+                status = "disabled";
+                x31_en: x31_en {
+                        gpios = <&gpioe 2 GPIO_ACTIVE_HIGH>;
+                        label = "x31en";
+                };
+                x32_en: x32_en {
+                        gpios = <&gpioe 3 GPIO_ACTIVE_HIGH>;
+                        label = "x32en";
+                };
+                x33_en: x33_en {
+                        gpios = <&gpioe 4 GPIO_ACTIVE_HIGH>;
+                        label = "x33en";
+                };
+                x34_en: x34_en {
+                        gpios = <&gpioe 5 GPIO_ACTIVE_HIGH>;
+                        label = "x34en";
+                };
+                x35_en: x35_en {
+                        gpios = <&gpioe 6 GPIO_ACTIVE_HIGH>;
+                        label = "x35en";
+                };
+        };
+
+        leds: leds {
+                compatible = "gpio-leds";
+                status = "okay";
+                led_ring1: led_ring1 {
+                        gpios = <&gpiob 0 GPIO_ACTIVE_HIGH>;
+                        label = "LedRing1";
+                };
+                led_ring2: led_ring2 {
+                        gpios = <&gpiob 1 GPIO_ACTIVE_HIGH>;
+                        label = "LedRing2";
+                };
+                led_ring3: led_ring3 {
+                        gpios = <&gpiob 2 GPIO_ACTIVE_HIGH>;
+                        label = "LedRing3";
+                };
+                led_ring4: led_ring4 {
+                        gpios = <&gpiof 11 GPIO_ACTIVE_HIGH>;
+                        label = "LedRing4";
+                };
+                led_status: led_status {
+                        gpios = <&gpiof 12 GPIO_ACTIVE_HIGH>;
+                        label = "LedStatus";
+                };
+        };
+
+        buttons: buttons {
+                compatible = "gpio-keys";
+                status = "okay";
+                button_up: button_up {
+                        label = "BtnUp";
+                        gpios = <&gpiof 1 GPIO_ACTIVE_HIGH>;
+                        zephyr,code = <INPUT_KEY_UP>;
+                };
+                button_right: button_right {
+                        label = "BtnRight";
+                        gpios = <&gpiof 2 GPIO_ACTIVE_HIGH>;
+                        zephyr,code = <INPUT_KEY_RIGHT>;
+                };
+                button_down: button_down {
+                        label = "BtnDown";
+                        gpios = <&gpiof 3 GPIO_ACTIVE_HIGH>;
+                        zephyr,code = <INPUT_KEY_DOWN>;
+                };
+                button_left: button_left {
+                        label = "BtnLeft";
+                        gpios = <&gpiof 4 GPIO_ACTIVE_HIGH>;
+                        zephyr,code = <INPUT_KEY_LEFT>;
+		};
+                button_ok: button_ok {
+                        label = "BtnOk";
+                        gpios = <&gpiof 5 GPIO_ACTIVE_HIGH>;
+                        zephyr,code = <INPUT_KEY_ENTER>;
+		};
+	};
+
+	pwmleds: pwmleds {
+		compatible = "pwm-leds";
+		status = "disabled";
+
+		pwm_led_red: pwm_led_red {
+			pwms = <&pwm3 1 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+			label = "red";
+		};
+		pwm_led_green: pwm_led_green {
+			pwms = <&pwm3 2 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+			label = "green";
+		};
+		pwm_led_blue: pwm_led_blue {
+			pwms = <&pwm3 3 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+			label = "blue";
+		};
+		pwm_backlight: pwm_backlight {
+			pwms = <&pwm3 4 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+			label = "backlight";
+		};
+	};
+};
+
+&rng {
+	status = "disabled";
+};
+
+&clk_csi {
+	status = "okay";
+};
+
+&rcc {
+	clocks = <&pll>;
+	clock-frequency = <DT_FREQ_M(240)>;
+	ahb-prescaler = <1>;
+	apb1-prescaler = <16>;//APB1 peripheral clock = 15 MHz, APB1 Timer clock = 30 MHz
+	apb2-prescaler = <16>;//APB2 peripheral clock = 15 MHz, APB2 Timer clock = 30 MHz
+	apb3-prescaler = <16>;//APB3 peripheral clock = 15 MHz, APB3 Timer clock = 30 MHz
+};
+
+&pll {
+	div-m = <2>;
+	mul-n = <120>;
+	div-p = <2>;
+	div-q = <2>;
+	div-r = <2>;
+	clocks = <&clk_hse>;
+	status = "okay";
+};
+
+&perck {
+	clocks = <&rcc STM32_SRC_CSI CKPER_SEL(1)>;
+	status = "okay";
+};
+
+/*
+		i2c4: i2c@44002c00 {
+			compatible = "st,stm32-i2c-v2";
+			clock-frequency = <I2C_BITRATE_STANDARD>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0x44002c00 0x400>;
+			clocks = <&rcc STM32_CLOCK_BUS_APB3 0x00000100>;
+			interrupts = <125 0>, <126 0>;
+			interrupt-names = "event", "error";
+			status = "disabled";
+		};
+*/
+
+
+/*
+&lpuart1 {
+	status = "disabled";
+	pinctrl-0 = <&lpuart1_tx_pb6 &lpuart1_rx_pb7>;
+	pinctrl-names = "default";
+	current-speed = <115200>;
+};
+*/
+&i2c4 {
+	compatible = "st,stm32-i2c-v2";
+	status = "okay";
+	pinctrl-0 = <&i2c4_scl_pb6 &i2c4_sda_pb7>;
+	pinctrl-names = "default";
+	clocks = <&clk_csi STM32_SRC_CSI I2C4_SEL(3)>;
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+/*
+	scl-gpios = <&i2c4_scl_pb6>;
+	sda-gpios = <&i2c4_sda_pb7>;
+	#gpio-cells = < 0x2 >;
+*/
+};
+
+&usart2 {
+	pinctrl-0 = <&usart2_tx_pa2 &usart2_rx_pa3>;
+	pinctrl-names = "default";
+	current-speed = <115200>;
+	clocks = <&clk_csi STM32_SRC_CSI USART2_SEL(3)>;
+	status = "okay";
+};
+
+&spi1 {
+	pinctrl-0 = <&spi1_sck_pb3 &spi1_miso_pb4 &spi1_mosi_pb5>;
+	pinctrl-names = "default";
+	cs-gpios = <&gpioe 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+	clocks = <&perck STM32_SRC_CKPER SPI1_SEL(4)>;
+	status = "okay";
+};
+
+&timers3 {
+	st,prescaler = <10000>;
+	status = "disabled";
+
+	pwm3: pwm {
+		status = "disabled";
+//		pinctrl-0 = <&tim3_ch3_pc6>;
+//		pinctrl-0 = <&tim3_ch0_pc6>,
+//			    <&tim3_ch1_pc7>,
+//			    <&tim3_ch2_pc8>,
+//			    <&tim3_ch3_pc9>;
+//		pinctrl-names = "default";
+//		pinctrl-names = "default", "sleep";
+	};
+};
+
+&rtc {
+	clocks = <&rcc STM32_CLOCK_BUS_APB3 0x00200000>,
+		 <&rcc STM32_SRC_LSE RTC_SEL(1)>;
+	status = "okay";
+};
+
+&dac1 {
+	/* outputs only on 2 pins and pa4 is reserved for VBUS_SENSE */
+	pinctrl-0 = <&dac1_out2_pa5>;  /* Zio D13 (on CN7) */
+	pinctrl-names = "default";
+	status = "disabled";
+};
+
+&adc1 {
+	pinctrl-0 = <&adc1_inp3_pa6 &adc1_inp15_pa3>; /* Zio A0, Zio D35 */
+	pinctrl-names = "default";
+	st,adc-clock-source = <ASYNC>;
+	st,adc-prescaler = <6>;
+	status = "disabled";
+};
+
